@@ -358,6 +358,95 @@
       padding: 32px;
     }
 
+    .fee-calculator {
+      max-width: 760px;
+      margin-bottom: 18px;
+      padding: 24px;
+      border: 1px solid var(--gold);
+      border-radius: 6px;
+      background: var(--white);
+    }
+
+    .fee-calculator h3 {
+      margin: 0 0 18px;
+      font-size: 1.4rem;
+    }
+
+    .fee-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: end;
+      gap: 18px;
+    }
+
+    .fee-options select {
+      width: 100%;
+      min-height: 48px;
+      padding: 11px 12px;
+      border: 1px solid var(--navy);
+      border-radius: 4px;
+      background: var(--white);
+      color: var(--charcoal);
+      font: inherit;
+    }
+
+    .fee-options select:focus-visible,
+    .fee-options input[type="checkbox"]:focus-visible {
+      outline: 3px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    .lunch-option {
+      display: flex;
+      min-height: 48px;
+      align-items: center;
+      gap: 10px;
+      color: var(--navy);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .fee-options input[type="checkbox"] {
+      width: 20px;
+      min-height: 20px;
+      margin: 0;
+      accent-color: var(--navy);
+    }
+
+    .fee-breakdown {
+      display: grid;
+      margin: 20px 0 0;
+      padding-top: 14px;
+      border-top: 1px solid var(--gold);
+      gap: 8px;
+    }
+
+    .fee-line,
+    .fee-total {
+      display: flex;
+      margin: 0;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .fee-line strong {
+      color: var(--navy);
+      white-space: nowrap;
+    }
+
+    .fee-total {
+      margin-top: 6px;
+      color: var(--navy);
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    .fee-total output {
+      font-size: 1.35rem;
+      white-space: nowrap;
+    }
+
     .form-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -544,6 +633,10 @@
       .form-card {
         padding: 22px;
       }
+
+      .fee-calculator {
+        padding: 22px;
+      }
     }
 
     @media (max-width: 420px) {
@@ -561,6 +654,11 @@
 
       .form-grid {
         grid-template-columns: 1fr;
+      }
+
+      .fee-options {
+        grid-template-columns: 1fr;
+        gap: 8px;
       }
 
       .field-wide {
@@ -676,8 +774,32 @@
         <div class="section-heading">
           <p class="eyebrow">Two speakers. One team.</p>
           <h2 id="register-title">Register your team</h2>
-          <p>Share your team details to get started. Entry is Rs 3,000 per team.</p>
+          <p>Use the calculator below to see your total. Entry is Rs 3,000 per team.</p>
         </div>
+        <section class="fee-calculator" aria-labelledby="fee-calculator-title">
+          <h3 id="fee-calculator-title">Calculate your fees</h3>
+          <div class="fee-options">
+            <div class="field">
+              <label for="team-count">Number of teams</label>
+              <select id="team-count" name="teamCount">
+                <option value="1">1 team</option>
+                <option value="2">2 teams</option>
+                <option value="3">3 teams</option>
+                <option value="4">4 teams</option>
+                <option value="5">5 teams</option>
+              </select>
+            </div>
+            <label class="lunch-option" for="lunch">
+              <input id="lunch" name="lunch" type="checkbox">
+              <span>Add lunch (Rs 600 per speaker)</span>
+            </label>
+          </div>
+          <div class="fee-breakdown" aria-live="polite">
+            <p class="fee-line"><span id="team-fee-label">Team entry (1 × Rs 3,000)</span><strong id="team-fee">Rs 3,000</strong></p>
+            <p class="fee-line"><span id="lunch-fee-label">Lunch (2 speakers × Rs 600)</span><strong id="lunch-fee">Rs 0</strong></p>
+            <p class="fee-total"><span>Total</span><output id="fee-total" for="team-count lunch">Rs 3,000</output></p>
+          </div>
+        </section>
         <form class="form-card" id="registration-form" novalidate>
           <div class="form-grid">
             <div class="field field-wide">
@@ -775,6 +897,35 @@
 
     updateCountdown();
     window.setInterval(updateCountdown, 60000);
+
+    const teamCountInput = document.querySelector("#team-count");
+    const lunchInput = document.querySelector("#lunch");
+    const teamFeeLabel = document.querySelector("#team-fee-label");
+    const teamFee = document.querySelector("#team-fee");
+    const lunchFeeLabel = document.querySelector("#lunch-fee-label");
+    const lunchFee = document.querySelector("#lunch-fee");
+    const totalFee = document.querySelector("#fee-total");
+
+    function formatFee(amount) {
+      return `Rs ${amount.toLocaleString("en-US")}`;
+    }
+
+    function updateFee() {
+      const teamCount = Number(teamCountInput.value);
+      const teamTotal = teamCount * 3000;
+      const speakerCount = teamCount * 2;
+      const lunchTotal = lunchInput.checked ? speakerCount * 600 : 0;
+
+      teamFeeLabel.textContent = `Team entry (${teamCount} × Rs 3,000)`;
+      teamFee.textContent = formatFee(teamTotal);
+      lunchFeeLabel.textContent = `Lunch (${speakerCount} speakers × Rs 600)`;
+      lunchFee.textContent = formatFee(lunchTotal);
+      totalFee.textContent = formatFee(teamTotal + lunchTotal);
+    }
+
+    teamCountInput.addEventListener("change", updateFee);
+    lunchInput.addEventListener("change", updateFee);
+    updateFee();
 
     const form = document.querySelector("#registration-form");
     const successMessage = document.querySelector("#success-message");
