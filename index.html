@@ -141,6 +141,63 @@
       font-size: clamp(1.1rem, 2.4vw, 1.4rem);
     }
 
+    .countdown {
+      padding: 28px 24px;
+      background: var(--gold);
+    }
+
+    .countdown-inner {
+      display: flex;
+      width: min(var(--content-width), 100%);
+      margin: 0 auto;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .countdown h2 {
+      margin: 0;
+      font-size: clamp(1.35rem, 3vw, 1.8rem);
+    }
+
+    .countdown-units {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(78px, 1fr));
+      gap: 10px;
+    }
+
+    .countdown-unit {
+      display: flex;
+      min-height: 76px;
+      padding: 8px 14px;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      border-radius: 4px;
+      background: var(--white);
+      color: var(--navy);
+    }
+
+    .countdown-unit strong {
+      font-size: 1.55rem;
+      line-height: 1.2;
+    }
+
+    .countdown-unit span {
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .countdown-status {
+      margin: 8px 0 0;
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
     .button {
       display: inline-flex;
       min-height: 48px;
@@ -425,6 +482,20 @@
         padding: 72px 24px;
       }
 
+      .countdown-inner {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .countdown-units {
+        width: 100%;
+      }
+
+      .countdown-unit {
+        padding: 8px;
+      }
+
       .hero::after {
         top: 36px;
         right: -72px;
@@ -531,6 +602,21 @@
         <h1 id="hero-title">Ravi Open<br>2027</h1>
         <p class="hero-tagline">Four teams. Seven minutes. One motion.</p>
         <a class="button" href="#register">Register your team</a>
+      </div>
+    </section>
+
+    <section class="countdown" aria-labelledby="countdown-title">
+      <div class="countdown-inner">
+        <div>
+          <p class="eyebrow">Sat 16 Jan 2027 · 09:30 Lahore time</p>
+          <h2 id="countdown-title">First round begins in</h2>
+          <p class="countdown-status" id="countdown-status" role="status" hidden>The first round has begun.</p>
+        </div>
+        <div class="countdown-units" role="timer" aria-label="Time until the first round" aria-live="off">
+          <div class="countdown-unit"><strong id="countdown-days">0</strong><span>Days</span></div>
+          <div class="countdown-unit"><strong id="countdown-hours">0</strong><span>Hours</span></div>
+          <div class="countdown-unit"><strong id="countdown-minutes">0</strong><span>Minutes</span></div>
+        </div>
       </div>
     </section>
 
@@ -662,6 +748,34 @@
   <footer class="site-footer">© Ravi Open 2027 · Lahore</footer>
 
   <script>
+    const countdownTarget = new Date("2027-01-16T09:30:00+05:00").getTime();
+    const countdownStatus = document.querySelector("#countdown-status");
+    const countdownUnits = {
+      days: document.querySelector("#countdown-days"),
+      hours: document.querySelector("#countdown-hours"),
+      minutes: document.querySelector("#countdown-minutes")
+    };
+
+    function updateCountdown() {
+      const remaining = countdownTarget - Date.now();
+
+      if (remaining <= 0) {
+        Object.values(countdownUnits).forEach((unit) => {
+          unit.textContent = "0";
+        });
+        countdownStatus.hidden = false;
+        return;
+      }
+
+      const totalMinutes = Math.floor(remaining / 60000);
+      countdownUnits.days.textContent = String(Math.floor(totalMinutes / 1440));
+      countdownUnits.hours.textContent = String(Math.floor((totalMinutes % 1440) / 60));
+      countdownUnits.minutes.textContent = String(totalMinutes % 60);
+    }
+
+    updateCountdown();
+    window.setInterval(updateCountdown, 60000);
+
     const form = document.querySelector("#registration-form");
     const successMessage = document.querySelector("#success-message");
     const fields = [
